@@ -17,6 +17,7 @@ class Chromosome:
             shape_order (list): A list representing the order of shapes.
             rotations (list): A list representing the rotation angles for each shape.
         """
+        assert len(shape_order) == len(rotations), "Shape order and rotations must have the same length."
         self.shape_order = shape_order
         self.rotations = rotations
         self.fitness = self._calculate_fitness(paper_width, paper_height ,dimensions)
@@ -116,9 +117,22 @@ class Chromosome:
         fitness = total_area / used_paper_area
 
         return fitness
+    
 
-        
-    def encode(self):
-        """Encode the chromosome's genes into a binary representation."""
-        pass
-        
+if __name__ == '__main__':
+    # Test the Chromosome class
+    # shape_order = [0, 1, 2]
+    # rotations = [False, True, False]
+    # dimensions = [
+    #     {'width': 100, 'height': 50},
+    #     {'width': 60, 'height': 80},
+    #     {'width': 30, 'height': 40}
+    # ]
+    # paper_width = 500
+    # paper_height = 500
+
+    # chromosome = Chromosome(shape_order, rotations, dimensions, paper_width, paper_height)
+    # print(chromosome)
+    # print("Fitness:", chromosome.fitness)
+    pass
+
