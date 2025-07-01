@@ -1,4 +1,6 @@
 import heapq
+import matplotlib.pyplot as plt
+import random
 
 
 class Chromosome:
@@ -14,23 +16,19 @@ class Chromosome:
         """
         Initializes a Chromosome instance.
         Args:
-            shape_order (list): A list representing the order of shapes.
-            rotations (list): A list representing the rotation angles for each shape.
+            shape_order (list[int]): A list representing the order of shapes.
+            rotations (list[boolean]): A list representing the rotation angles for each shape.
         """
         assert len(shape_order) == len(rotations), "Shape order and rotations must have the same length."
         self.shape_order = shape_order
         self.rotations = rotations
         self.fitness = self._calculate_fitness(paper_width, paper_height ,dimensions)
 
-
-    def __repr__(self):
-        return f"Chromosome(genes={self.genes})"
     
     def __str__(self):
         return f"Chromosome with shape order: {self.shape_order} and rotations: {self.rotations}"
     
     def __eq__(self, other):
-        """Check if two chromosomes are equal based on their shape order and rotations."""
         if not isinstance(other, Chromosome):
             return False
         return (self.shape_order == other.shape_order and
@@ -49,7 +47,7 @@ class Chromosome:
         Args:
             paper_width (int): Width of the paper.
             paper_height (int): Height of the paper.
-            given_rectangles (list[dict[]]): List of rectangles to be placed, each represented as a dictionary with 'width', 'height' and 'number' keys.
+            dimensions (list[dict[]]): List of rectangles to be placed, each represented as a dictionary with 'width', 'height' and 'number' keys.
         """
         placed = []
         active_points = []
@@ -118,21 +116,45 @@ class Chromosome:
 
         return fitness
     
+    def show(self, paper_width, paper_height, dimensions):
+        """
+        Visualizes the chromosome by plotting the rectangles on a paper.
+        Args:
+            paper_width (int): Width of the paper.
+            paper_height (int): Height of the paper.
+            dimensions (list[dict]): List of rectangles to be placed, each represented as a dictionary with 'width', 'height' and 'number' keys.
+        """
+
+        placed_rectangles = self.bottom_left_with_heap(paper_width, paper_height, dimensions)
+
+        fig, ax = plt.subplots()
+        ax.set_xlim(0, paper_width)
+        ax.set_ylim(0, paper_height)
+        ax.set_aspect('equal')
+        
+        colors = plt.cm.get_cmap('tab20', len(dimensions))
+
+        for idx, rect in enumerate(placed_rectangles):
+            color = colors(self.shape_order[idx])
+            ax.add_patch(plt.Rectangle((rect['x'], rect['y']), rect['width'], rect['height'], fill=True, color=color, edgecolor='black'))
+
+        plt.title(f"Chromosome Fitness: {self.fitness:.2f}")
+        plt.show()
+    
 
 if __name__ == '__main__':
     # Test the Chromosome class
-    # shape_order = [0, 1, 2]
-    # rotations = [False, True, False]
-    # dimensions = [
-    #     {'width': 100, 'height': 50},
-    #     {'width': 60, 'height': 80},
-    #     {'width': 30, 'height': 40}
-    # ]
-    # paper_width = 500
-    # paper_height = 500
+    shape_order = [0, 1, 2, 0, 1, 2, 0, 1, 2]
+    rotations = [False, True, False, False, True, False, True, False, True]
+    dimensions = [
+        {'width': 100, 'height': 50},
+        {'width': 60, 'height': 80},
+        {'width': 30, 'height': 40},
+    ]
+    paper_width = 500
+    paper_height = 500
 
-    # chromosome = Chromosome(shape_order, rotations, dimensions, paper_width, paper_height)
-    # print(chromosome)
-    # print("Fitness:", chromosome.fitness)
-    pass
+    chromosome = Chromosome(shape_order, rotations, dimensions, paper_width, paper_height)
+    chromosome.show(paper_width, paper_height, dimensions)
+    
 

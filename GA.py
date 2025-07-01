@@ -81,21 +81,29 @@ def order_crossover(pairs, dimensions, paper_width, paper_height):
 
     return children
 
-    def mutate(chromosome, mutation_rate):
-        """
-        Mutates a chromosome by swapping two random genes with a given mutation rate.
-        Args:
-            chromosome (Chromosome): The chromosome to mutate.
-            mutation_rate (float): The probability of mutation for each gene.
-        """
-        for i in range(len(chromosome.shape_order)):
-            if random.random() < mutation_rate:
-                j = random.randint(0, len(chromosome.shape_order) - 1)
-                # Swap genes
-                chromosome.shape_order[i], chromosome.shape_order[j] = chromosome.shape_order[j], chromosome.shape_order[i]
-                # Swap rotations
-                chromosome.rotations[i], chromosome.rotations[j] = chromosome.rotations[j], chromosome.rotations[i]
     
+    def mutate(chromosomes, mutation_rate, rotation_mutation_rate=0.1):
+        """
+        Mutates a list of chromosomes by swapping two random genes and changing the rotation of a gene with given mutation rates.
+        Args:
+            chromosomes (list[Chromosome]): List of chromosomes to mutate.
+            mutation_rate (float): Probability of swapping two genes.
+            rotation_mutation_rate (float): Probability of changing the rotation of a gene.
+        """
+        for chromosome in chromosomes:
+            length = len(chromosome.shape_order)
+            for i in range(length):
+                # Change order of two figures
+                if random.random() < mutation_rate:
+                    j = random.randint(0, length - 1)
+                    chromosome.shape_order[i], chromosome.shape_order[j] = chromosome.shape_order[j], chromosome.shape_order[i]
+                    chromosome.rotations[i], chromosome.rotations[j] = chromosome.rotations[j], chromosome.rotations[i]
+
+                # Change rotation of a figure
+                if random.random() < rotation_mutation_rate:
+                    chromosome.rotations[i] = not chromosome.rotations[i]
+        
+
 
 if __name__ == '__main__':
     pass
