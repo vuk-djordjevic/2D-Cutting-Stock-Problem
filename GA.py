@@ -80,6 +80,21 @@ def order_crossover(pairs, dimensions, paper_width, paper_height):
         children.append(Chromosome(child2, child2_rotations, dimensions, paper_width, paper_height))
 
     return children
+
+    def mutate(chromosome, mutation_rate):
+        """
+        Mutates a chromosome by swapping two random genes with a given mutation rate.
+        Args:
+            chromosome (Chromosome): The chromosome to mutate.
+            mutation_rate (float): The probability of mutation for each gene.
+        """
+        for i in range(len(chromosome.shape_order)):
+            if random.random() < mutation_rate:
+                j = random.randint(0, len(chromosome.shape_order) - 1)
+                # Swap genes
+                chromosome.shape_order[i], chromosome.shape_order[j] = chromosome.shape_order[j], chromosome.shape_order[i]
+                # Swap rotations
+                chromosome.rotations[i], chromosome.rotations[j] = chromosome.rotations[j], chromosome.rotations[i]
     
 
 if __name__ == '__main__':
