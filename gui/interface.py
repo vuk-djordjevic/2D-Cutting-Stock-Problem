@@ -11,7 +11,7 @@ class RectangleInputApp:
 
         self.rectangles = []
         self.custom_font = tkfont.Font(family="Segoe UI", size=10)
-        self.list_font = tkfont.Font(family="Segoe UI", size=11, weight="bold")
+        self.list_font = tkfont.Font(family="Segoe UI", size=11)
 
         # === Material Dimensions ===
         material_frame = tk.LabelFrame(master, text="Material Dimensions", padx=10, pady=10, bg="#F9EDE1", font=self.custom_font)
@@ -49,7 +49,7 @@ class RectangleInputApp:
         list_frame = tk.LabelFrame(master, text="Added Rectangles", padx=10, pady=10, bg="#F9EDE1", font=self.custom_font)
         list_frame.pack(padx=20, pady=5, fill="x")
 
-        self.rect_listbox = tk.Listbox(list_frame, width=30, height=6, font=self.list_font, bg="#fff5ef", relief=tk.GROOVE, justify="center")
+        self.rect_listbox = tk.Listbox(list_frame, width=50, height=6, font=self.list_font, bg="#fff5ef", relief=tk.GROOVE, justify="center")
         self.rect_listbox.pack(padx=5, pady=5)
 
         # === Button Row: Remove & Done ===
@@ -109,8 +109,8 @@ class RectangleInputApp:
             messagebox.showerror("Validation Error", "Material dimensions must be valid integers.")
             return
 
-        if len(self.rectangles) < 2:
-            messagebox.showwarning("Validation Error", "Please add at least 2 rectangles before proceeding.")
+        if len(self.rectangles) < 1:
+            messagebox.showwarning("Validation Error", "Please add at least 1 rectangle before proceeding.")
             return
 
         # Simulate final action
