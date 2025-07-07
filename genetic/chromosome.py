@@ -34,6 +34,8 @@ class Chromosome:
         return (self.shape_order == other.shape_order and
                 self.rotations == other.rotations)
     
+    def __len__(self):
+        return len(self.shape_order)
 
     def _rectangles_overlap(self, r1, r2):
         return not (r1['x'] + r1['width'] <= r2['x'] or
