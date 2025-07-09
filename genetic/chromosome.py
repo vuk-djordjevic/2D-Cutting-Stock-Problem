@@ -22,7 +22,7 @@ class Chromosome:
         assert len(shape_order) == len(rotations), "Shape order and rotations must have the same length."
         self.shape_order = shape_order
         self.rotations = rotations
-        self.fitness = self._calculate_fitness(paper_width, paper_height ,dimensions)
+        self.fitness = self.calculate_fitness(paper_width, paper_height ,dimensions)
 
     
     def __str__(self):
@@ -55,11 +55,11 @@ class Chromosome:
         active_points = []
         heapq.heappush(active_points, (0, 0))
 
-        for i in self.shape_order:
+        for idx, shape in enumerate(self.shape_order):
             found_pos = None
-            rect_width = dimensions[i]['width']
-            rect_height = dimensions[i]['height']
-            if self.rotations[i]:
+            rect_width = dimensions[shape]['width']
+            rect_height = dimensions[shape]['height']
+            if self.rotations[idx]:
                 # Swap width and height if the shape is rotated
                 rect_width, rect_height = rect_height, rect_width
 
@@ -79,7 +79,7 @@ class Chromosome:
 
             if found_pos:
                 x, y = found_pos
-                placed.append({'x': x, 'y': y, 'width': rect_width, 'height': rect_height})
+                placed.append({'x': x, 'y': y, 'width': rect_width, 'height': rect_height, 'shape': shape})
 
                 # Add new active points to the heap
                 heapq.heappush(active_points, (y, x + rect_width))
@@ -91,30 +91,31 @@ class Chromosome:
 
         return placed
 
-    def _calculate_fitness(self, paper_width, paper_height, dimensions):
+    def calculate_fitness(self, paper_width, paper_height, dimensions):
         """
         Calculate the fitness of the chromosome.
         Args:
             paper_width (float): The width of the paper.
             paper_height (float): The height of the paper.
             placed_rectangles (list[dict]): List of rectangles placed by the bottom-left algorithm.
+        Returns:
+            float: The fitness value of the chromosome (lower is better).
         """
         placed_rectangles = self.bottom_left_with_heap(paper_width, paper_height, dimensions)
         if not placed_rectangles:
-            return 0.0
+            return float('inf')  # If no rectangles were placed, return infinite fitness
 
         total_area = sum(r['width'] * r['height'] for r in placed_rectangles)
 
+        max_rect_dimension = max(max(r['width'], r['height']) for r in placed_rectangles)
         # Used paper height
         max_y = max(r['y'] + r['height'] for r in placed_rectangles)
+        fitness = max_y
+        # used_paper_area = paper_width * max_y
 
-        used_paper_area = paper_width * max_y
-
-        if used_paper_area > paper_width * paper_height:
-            # used_paper_area = paper_width * paper_height
-            pass # !!! Get back to this later, maybe throw an error or handle it differently !!!
-
-        fitness = total_area / used_paper_area
+        if len(placed_rectangles) < len(self.shape_order):
+            # If not all rectangles were placed, we consider the fitness to be lower
+            fitness = max_y + (len(self.shape_order) - len(placed_rectangles)) * max_rect_dimension  # Penalize for unplaced rectangles
 
         return fitness
     
@@ -134,11 +135,13 @@ class Chromosome:
         ax.set_ylim(0, paper_height)
         ax.set_aspect('equal')
         
-        colors = plt.cm.get_cmap('tab20', len(dimensions))
+        # colors = plt.cm.get_cmap('tab20', len(dimensions))
+        colors = [plt.cm.viridis(i / len(dimensions)) for i in range(len(dimensions))]
 
-        for idx, rect in enumerate(placed_rectangles):
-            color = colors(self.shape_order[idx])
-            ax.add_patch(plt.Rectangle((rect['x'], rect['y']), rect['width'], rect['height'], fill=True, color=color, edgecolor='black'))
+
+        for rect in placed_rectangles:
+            color = colors[rect['shape']]
+            ax.add_patch(plt.Rectangle((rect['x'], rect['y']), rect['width'], rect['height'], fill=True, facecolor=color, edgecolor='black'))
 
         plt.title(f"Chromosome Fitness: {self.fitness:.2f}")
         plt.show()

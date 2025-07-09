@@ -19,7 +19,8 @@ def generate_individual(dimensions, paper_width, paper_height):
 
     random.shuffle(shape_order)
 
-    rotations = [random.randint(0, 1) for _ in range(len(shape_order))]
+    # rotations = [random.randint(0, 1) for _ in range(len(shape_order))]
+    rotations = [random.choice([True, False]) for _ in range(len(shape_order))]
 
     return Chromosome(shape_order, rotations, dimensions, paper_width, paper_height)
 
@@ -37,11 +38,11 @@ def generate_initial_chromosomes(pop_size, dimensions, paper_width, paper_height
 
 def rank_chromosomes(chromosomes):
     """
-    Ranks the chromosomes based on their fitness values.
+    Ranks the chromosomes based on their fitness values. Lower fitness values are better.
     Args:   
         chromosomes (list[Chromosome]): List of chromosomes to be ranked.
     """
-    return sorted(chromosomes, key=lambda x: x.fitness, reverse=True)
+    return sorted(chromosomes, key=lambda x: x.fitness)
 
 
 def natural_selection(chromosomes, n_keep):
@@ -69,32 +70,28 @@ def elitis(chromosomes_old, chromosomes_new, elitis_rate, population_size):
 
 def roulette_selection(parents):
     """
-    Selects a pair of parents using roulette wheel selection based on their fitness values.
+    Selects a pair of parents using roulette wheel selection based on position-based weights.
+    Assumes parents are sorted from best (lowest fitness) to worst.
     Args:
-        parents (list[Chromosome]): List of parent chromosomes.
+        parents (list[Chromosome]): List of parent chromosomes sorted by fitness.
     """
     pairs = []
-    i = 0
-    for i in range(0, len(parents), 2):
-        weights=[]
-        for i in range(len(parents)):
-            weights.append((len(parents)-i)*random.random()) #za minimum
-            #  weights.append((i+1)*random.random()) #za maksimum
-        if (weights[0]>=weights[1]):
-            maxInd1=0;
-            maxInd2=1;
-        else:
-            maxInd1=1;
-            maxInd2=0;
+    num_parents = len(parents)
 
-        for i in range(2,len(parents)):
-            if weights[i]>weights[maxInd1]:
-                maxInd2=maxInd1
-                maxInd1=i
-            elif weights[i]>weights[maxInd2]:
-                maxInd2=1
+    for _ in range(0, num_parents // 2):
+        # Setting weights based on position in the list
+        # The first parent has the highest weight, the last parent has the lowest weight
+        weights = [(num_parents - i) * random.random() for i in range(num_parents)]
+
+        # Find the two parents with the highest weights
+        maxInd1 = weights.index(max(weights))
+        weights[maxInd1] = -1  # So that we don't select the same parent again
+        maxInd2 = weights.index(max(weights))
+
         pairs.append([parents[maxInd1], parents[maxInd2]])
+
     return pairs
+
 
 
 def order_crossover(pairs, dimensions, paper_width, paper_height):
@@ -136,38 +133,39 @@ def order_crossover(pairs, dimensions, paper_width, paper_height):
             dict_a[i] += 1
             dict_b[i] += 1
         for i in a.shape_order[start:end]:
-            dict_a[i] -= 1
-        for i in b.shape_order[start:end]:
             dict_b[i] -= 1
-        # fills child1 with remaining shapes from b
+        for i in b.shape_order[start:end]:
+            dict_a[i] -= 1
+        # fills child2 with remaining shapes from a
         fill_a = []
         fill_a_rotations = []
-        for idx, val in enumerate(b.shape_order):
+        for idx, val in enumerate(a.shape_order):
             if dict_a[val] > 0:
                 fill_a.append(val)
-                fill_a_rotations.append(b.rotations[idx])
+                fill_a_rotations.append(a.rotations[idx])
                 dict_a[val] -= 1
-        # fills child2 with remaining shapes from a
+
+        # fills child1 with remaining shapes from b
         fill_b = []
         fill_b_rotations = []
-        for idx, val in enumerate(a.shape_order):
+        for idx, val in enumerate(b.shape_order):
             if dict_b[val] > 0:
                 fill_b.append(val)
                 fill_b_rotations.append(b.rotations[idx])
                 dict_b[val] -= 1
 
-        index_a = 0
-        index_b = 0
+        index_child1 = 0
+        index_child2 = 0
 
         for i in range(len(child1)):
             if child1[i] is None:
-                child1[i] = fill_a[index_a]
-                child1_rotations[i] = fill_a_rotations[index_a]
-                index_a += 1
+                child1[i] = fill_b[index_child1]
+                child1_rotations[i] = fill_b_rotations[index_child1]
+                index_child1 += 1
             if child2[i] is None:
-                child2[i] = fill_b[index_b]
-                child2_rotations[i] = fill_b_rotations[index_b]
-                index_b += 1
+                child2[i] = fill_a[index_child2]
+                child2_rotations[i] = fill_a_rotations[index_child2]
+                index_child2 += 1
 
         children.append(Chromosome(child1, child1_rotations, dimensions, paper_width, paper_height))
         children.append(Chromosome(child2, child2_rotations, dimensions, paper_width, paper_height))
@@ -175,26 +173,35 @@ def order_crossover(pairs, dimensions, paper_width, paper_height):
     return children
 
     
-def mutate(chromosomes, mutation_rate, rotation_mutation_rate=0.1):
+def mutate(chromosomes, dimensions, paper_width, paper_height, mutation_rate, rotation_mutation_rate=0.1):
     """
     Mutates a list of chromosomes by swapping two random genes and changing the rotation of a gene with given mutation rates.
     Args:
         chromosomes (list[Chromosome]): List of chromosomes to mutate.
+        dimensions (list[dict]): Dimensions of the shape numbers.
+        paper_width (float): Width of the paper.
+        paper_height (float): Height of the paper.
         mutation_rate (float): Probability of swapping two genes.
         rotation_mutation_rate (float): Probability of changing the rotation of a gene.
     """
     for chromosome in chromosomes:
         length = len(chromosome.shape_order)
+        indicator = False
         for i in range(length):
             # Change order of two figures
             if random.random() < mutation_rate:
                 j = random.randint(0, length - 1)
                 chromosome.shape_order[i], chromosome.shape_order[j] = chromosome.shape_order[j], chromosome.shape_order[i]
                 chromosome.rotations[i], chromosome.rotations[j] = chromosome.rotations[j], chromosome.rotations[i]
+                indicator = True
 
             # Change rotation of a figure
             if random.random() < rotation_mutation_rate:
                 chromosome.rotations[i] = not chromosome.rotations[i]
+                indicator = True
+        # refresh fitness after mutation
+        if indicator:
+            chromosome.fitness = chromosome.calculate_fitness(paper_width, paper_height, dimensions)
 
 
 def genetic_algorithm(population_size, dimensions, paper_width, paper_height, generations=100, elitis_rate=0.1, mutation_rate=0.05, rotation_mutation_rate=0.1):
@@ -217,7 +224,7 @@ def genetic_algorithm(population_size, dimensions, paper_width, paper_height, ge
         # parents = natural_selection(ranked_parents, population_size)
         pairs = roulette_selection(ranked_parents)
         children = order_crossover(pairs, dimensions, paper_width, paper_height)
-        mutate(children, mutation_rate, rotation_mutation_rate)
+        mutate(children, dimensions, paper_width, paper_height, mutation_rate, rotation_mutation_rate)
         ranked_children = rank_chromosomes(children)
         chromosomes = elitis(ranked_parents, ranked_children, elitis_rate, population_size)
 
@@ -232,10 +239,13 @@ if __name__ == '__main__':
     dimensions = [
         {"width": 100, "height": 50, "number": 2},
         {"width": 80, "height": 60, "number": 1},
-        {"width": 40, "height": 30, "number": 3}
+        {"width": 40, "height": 30, "number": 3},
+        {"width": 60, "height": 40, "number": 2},
+        {"width": 30, "height": 20, "number": 4},
+        {"width": 20, "height": 10, "number": 5}
     ]
-    paper_width = 500
-    paper_height = 400
-    population_size = 10
+    paper_width = 150
+    paper_height = 200
+    population_size = 100
 
-    genetic_algorithm(population_size, dimensions, paper_width, paper_height)
+    genetic_algorithm(population_size, dimensions, paper_width, paper_height, generations = 200)
