@@ -54,7 +54,7 @@ class RectangleInputApp:
         self.rect_listbox = tk.Listbox(list_frame, width=50, height=6, font=self.list_font, bg="#fff5ef", relief=tk.GROOVE, justify="center")
         self.rect_listbox.pack(padx=5, pady=5)
 
-        # Button Row: Remove & Done
+        # Button Row: Remove & Reset & Done
         button_frame = tk.Frame(master, bg="#F9EDE1")
         button_frame.pack(pady=15)
 
