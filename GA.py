@@ -248,4 +248,4 @@ if __name__ == '__main__':
     paper_height = 200
     population_size = 100
 
-    genetic_algorithm(population_size, dimensions, paper_width, paper_height, generations = 200)
+    genetic_algorithm(population_size, dimensions, paper_width, paper_height, generations = 300)

@@ -1,5 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox, font as tkfont
+from GA import genetic_algorithm
 
 class RectangleInputApp:
     def __init__(self, master):
@@ -116,9 +117,16 @@ class RectangleInputApp:
         # Simulate final action
         self.material_dimensions = (mat_width, mat_height)
         self.given_rectangles = self.rectangles
-        messagebox.showinfo("Success", "Data is valid. (Result logic not implemented yet.)")
+        # messagebox.showinfo("Success", "Data is valid. (Result logic not implemented yet.)")
         print("Material dimensions:", self.material_dimensions)
         print("Rectangles to cut:", self.given_rectangles)
+        genetic_algorithm(
+            population_size=100,
+            dimensions=self.given_rectangles,
+            paper_width=mat_width,
+            paper_height=mat_height,
+            generations=200
+        )
 
 if __name__ == "__main__":
     root = tk.Tk()
