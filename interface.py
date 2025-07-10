@@ -12,9 +12,10 @@ class RectangleInputApp:
 
         self.rectangles = []
         self.custom_font = tkfont.Font(family="Segoe UI", size=10)
-        self.list_font = tkfont.Font(family="Segoe UI", size=11)
+        self.list_font = tkfont.Font(family="Segoe UI", size=11, weight="normal")
 
-        # === Material Dimensions ===
+
+        # Material Dimensions 
         material_frame = tk.LabelFrame(master, text="Material Dimensions", padx=10, pady=10, bg="#F9EDE1", font=self.custom_font)
         material_frame.pack(padx=20, pady=10, fill="x")
 
@@ -26,7 +27,7 @@ class RectangleInputApp:
         self.material_height_entry = self._create_entry(material_frame)
         self.material_height_entry.grid(row=1, column=1, pady=5)
 
-        # === Rectangle Input ===
+        # Rectangle Input
         rectangle_frame = tk.LabelFrame(master, text="Rectangle Input", padx=10, pady=10, bg="#F9EDE1", font=self.custom_font)
         rectangle_frame.pack(padx=20, pady=10, fill="x")
 
@@ -46,20 +47,24 @@ class RectangleInputApp:
                                     command=self.add_rectangle, bg="#e3c8b7", activebackground="#d8b5a3")
         self.add_button.grid(row=3, column=0, columnspan=2, pady=10)
 
-        # === List Frame (narrower, centered) ===
+        # List Frame
         list_frame = tk.LabelFrame(master, text="Added Rectangles", padx=10, pady=10, bg="#F9EDE1", font=self.custom_font)
         list_frame.pack(padx=20, pady=5, fill="x")
 
         self.rect_listbox = tk.Listbox(list_frame, width=50, height=6, font=self.list_font, bg="#fff5ef", relief=tk.GROOVE, justify="center")
         self.rect_listbox.pack(padx=5, pady=5)
 
-        # === Button Row: Remove & Done ===
+        # Button Row: Remove & Done
         button_frame = tk.Frame(master, bg="#F9EDE1")
         button_frame.pack(pady=15)
 
         self.remove_button = tk.Button(button_frame, text="Remove", font=self.custom_font,
                                        command=self.remove_selected_rectangle, bg="#d89c9c", activebackground="#c87b7b")
         self.remove_button.grid(row=0, column=0, padx=15, pady=5)
+
+        self.reset_button = tk.Button(button_frame, text="Reset", font=self.custom_font,
+                              command=self.reset_all, bg="#e4c2c2", activebackground="#dba7a7")
+        self.reset_button.grid(row=0, column=2, padx=15, pady=5)
 
         self.done_button = tk.Button(button_frame, text="Done", font=self.custom_font,
                                      command=self.done_clicked, bg="#a7d7c5", activebackground="#8fcab5")
@@ -117,7 +122,6 @@ class RectangleInputApp:
         # Simulate final action
         self.material_dimensions = (mat_width, mat_height)
         self.given_rectangles = self.rectangles
-        # messagebox.showinfo("Success", "Data is valid. (Result logic not implemented yet.)")
         print("Material dimensions:", self.material_dimensions)
         print("Rectangles to cut:", self.given_rectangles)
         genetic_algorithm(
@@ -127,6 +131,18 @@ class RectangleInputApp:
             paper_height=mat_height,
             generations=200
         )
+    
+    def reset_all(self):
+        """Resetuje sve unose i listu pravougaonika."""
+        self.material_width_entry.delete(0, tk.END)
+        self.material_height_entry.delete(0, tk.END)
+        self.rect_width_entry.delete(0, tk.END)
+        self.rect_height_entry.delete(0, tk.END)
+        self.rect_count_entry.delete(0, tk.END)
+
+        self.rectangles.clear()
+        self.rect_listbox.delete(0, tk.END)
+
 
 if __name__ == "__main__":
     root = tk.Tk()
