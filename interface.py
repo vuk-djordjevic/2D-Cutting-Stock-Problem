@@ -107,7 +107,7 @@ class RectangleInputApp:
             messagebox.showinfo("Selection Required", "Please select a rectangle to remove.")
 
     def done_clicked(self):
-        """Validates inputs and simulates project execution (future implementation)."""
+        """Validates inputs and simulates project execution."""
         try:
             mat_width = int(self.material_width_entry.get())
             mat_height = int(self.material_height_entry.get())
@@ -133,7 +133,7 @@ class RectangleInputApp:
         )
     
     def reset_all(self):
-        """Resetuje sve unose i listu pravougaonika."""
+        """Resets all user inputs and the list of rectangles."""
         self.material_width_entry.delete(0, tk.END)
         self.material_height_entry.delete(0, tk.END)
         self.rect_width_entry.delete(0, tk.END)
